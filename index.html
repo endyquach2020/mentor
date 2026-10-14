@@ -46,7 +46,8 @@
           <span>Tổng kết tiết học (AI)</span>
         </button>
 
-        <button onclick="openAssignModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1.5 transition shadow-md shadow-indigo-600/20">
+        <!-- NÚT GIAO BÀI -->
+        <button id="btnOpenAssign" onclick="openAssignModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center space-x-1.5 transition shadow-md shadow-indigo-600/20 cursor-pointer">
           <i data-lucide="layers" class="w-3.5 h-3.5"></i>
           <span>Giao bài (<span id="btnTaskCount">0</span>)</span>
         </button>
@@ -183,7 +184,7 @@
   </main>
 
   <!-- MODAL 1: BẢNG XẾP HẠNG THI ĐUA -->
-  <div id="leaderboardModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <div id="leaderboardModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center space-x-2">
@@ -195,7 +196,7 @@
             <p class="text-[11px] text-slate-400">Cập nhật tức thời theo số bài hoàn thành</p>
           </div>
         </div>
-        <button onclick="toggleLeaderboardModal()" class="text-slate-400 hover:text-white">&times;</button>
+        <button onclick="toggleLeaderboardModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
       </div>
 
       <div class="overflow-y-auto max-h-80 divide-y divide-slate-800/60" id="leaderboardList"></div>
@@ -203,7 +204,7 @@
   </div>
 
   <!-- MODAL 2: TỔNG KẾT TIẾT HỌC BẰNG AI & XUẤT EXCEL -->
-  <div id="summaryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <div id="summaryModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center space-x-2">
@@ -215,7 +216,7 @@
             <p class="text-[11px] text-slate-400">Đánh giá năng lực và đề xuất sư phạm tự động</p>
           </div>
         </div>
-        <button onclick="closeSummaryModal()" class="text-slate-400 hover:text-white">&times;</button>
+        <button onclick="closeSummaryModal()" class="text-slate-400 hover:text-white text-xl leading-none">&times;</button>
       </div>
 
       <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-2 leading-relaxed" id="aiPedagogicalReport">
@@ -235,8 +236,8 @@
     </div>
   </div>
 
-  <!-- MODAL 3: GIAO BÀI TẬP (CÓ LISTBOX STEM + CHECKBOX GỢI Ý CODE MẪU) -->
-  <div id="assignModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <!-- MODAL 3: GIAO BÀI TẬP (ĐÃ SỬA CƠ CHẾ HIỂN THỊ FLEX) -->
+  <div id="assignModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center space-x-2">
@@ -246,7 +247,7 @@
             <p class="text-[11px] text-slate-400">Tùy biến bài tập giải thuật hoặc các mô hình STEM kèm phân hóa gợi ý code mẫu</p>
           </div>
         </div>
-        <button onclick="closeAssignModal()" class="text-slate-400 hover:text-white text-lg leading-none">&times;</button>
+        <button onclick="closeAssignModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
       </div>
 
       <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1" id="assignModalTaskList"></div>
@@ -290,7 +291,6 @@
     const pcsRef = firebase.database().ref("pcs");
     const assignmentsRef = firebase.database().ref("assignments");
 
-    // KHO BÀI TẬP MẪU CHUẨN CÓ SẴN (PRESETS)
     const PRESETS = {
       algorithm: {
         title: "Bài tập Thuật toán Python",
@@ -305,9 +305,7 @@
         desc: "Dự án STEM: Vận dụng logic tuần tự và trễ thời gian để mô phỏng chu kỳ đèn giao thông ngã tư: Bật ĐỎ (3s) ➔ VÀNG (1s) ➔ XANH (3s).",
         sample: "Đèn Đỏ ➔ Vàng ➔ Xanh",
         expectedOutput: "STEM_PASSED",
-        // Code gợi ý khung sườn (scaffolding)
         templateStarter: "# DỰ ÁN STEM: ĐIỀU KHIỂN ĐÈN GIAO THÔNG\n# Các hàm có sẵn: led_red.on(), led_yellow.on(), led_green.on()\n# led_all_off(), sleep(giây)\n\nled_all_off()\n\n# 1. Bật đèn Đỏ sáng 3 giây\nled_red.on()\nsleep(3)\n\n# 2. Chuyển sang đèn Vàng 1 giây (Học sinh viết tiếp tại đây):\n\n\n# 3. Chuyển sang đèn Xanh 3 giây (Học sinh viết tiếp tại đây):\n\n\nprint('STEM_PASSED')",
-        // Code trống (không gợi ý)
         templateBlank: "# DỰ ÁN STEM: ĐIỀU KHIỂN ĐÈN GIAO THÔNG\n# Học sinh tự lập trình toàn bộ chu kỳ Đỏ ➔ Vàng ➔ Xanh:\n\nprint('STEM_PASSED')"
       },
       stem_morse: {
@@ -315,7 +313,7 @@
         desc: "Dự án STEM: Quy chuẩn hàng hải quốc tế quy định tín hiệu cầu cứu SOS gồm: 3 nháy ngắn (S: · · ·) ➔ 3 nháy dài (O: — — —) ➔ 3 nháy ngắn (S: · · ·). Hãy dùng vòng lặp for lập trình phát chuỗi tín hiệu SOS.",
         sample: "· · ·   — — —   · · ·",
         expectedOutput: "SOS_TRANSMITTED",
-        templateStarter: "# DỰ ÁN STEM: TRẠM PHÁT MÃ MORSE SOS\n# Các hàm có sẵn: morse_dot(), morse_dash()\n\n# 1. Phát chữ S (3 nháy ngắn)\nfor i in range(3):\n    morse_dot()\n\n# 2. Phát chữ O (3 nháy dài) - Học sinh viết tiếp tại đây:\n\n\n# 3. Phát chữ S (3 nháy ngắn) - Học sinh viết tiếp tại đây:\n\n\nprint('SOS_TRANSMITTED')",
+        templateStarter: "# DỰ ÁN STEM: TRẠM PHÁT MÃ MORSE SOS\n# Các hàm có sẵn:\n# - morse_dot()  : Phát 1 nhịp ngắn (·)\n# - morse_dash() : Phát 1 nhịp dài (—)\n\n# 1. Phát chữ S (3 nhịp ngắn)\nfor i in range(3):\n    morse_dot()\n\n# 2. Phát chữ O (3 nhịp dài) - Học sinh viết tiếp tại đây:\n\n\n# 3. Phát chữ S (3 nhịp ngắn) - Học sinh viết tiếp tại đây:\n\n\nprint('SOS_TRANSMITTED')",
         templateBlank: "# DỰ ÁN STEM: TRẠM PHÁT MÃ MORSE SOS\n# Tự viết vòng lặp phát đủ 3 chữ S - O - S:\n\nprint('SOS_TRANSMITTED')"
       }
     };
@@ -329,8 +327,17 @@
     function initSystem() {
       assignmentsRef.on("value", snap => {
         const data = snap.val();
-        if (data && Array.isArray(data)) {
-          currentAssignments = data;
+        if (data && Array.isArray(data) && data.length > 0) {
+          currentAssignments = data.map((t, idx) => ({
+            id: t.id || `task_${idx + 1}`,
+            type: t.type || 'algorithm',
+            hasTemplate: t.hasTemplate !== undefined ? t.hasTemplate : true,
+            title: t.title || `Bài ${idx + 1}`,
+            desc: t.desc || '',
+            sample: t.sample || '',
+            expectedOutput: t.expectedOutput || '',
+            template: t.template || '# Viết code tại đây\n'
+          }));
         } else {
           currentAssignments = [
             { id: "task_1", type: "algorithm", hasTemplate: true, title: "Bài 1: Tính tổng số chẵn từ 1 đến N", desc: "Tính tổng chẵn từ 1 đến 10", sample: "10 ➔ 30", expectedOutput: "30", template: "# Bài 1\nn = 10\ntong = 0\nfor i in range(1, n + 1):\n    if i % 2 == 0:\n        tong += i\nprint(tong)" },
@@ -481,7 +488,7 @@
       currentAssignments.forEach((task, idx) => {
         const isPassed = studentTasks[task.id]?.passed;
         const isSelected = task.id === selectedTaskKeyToView;
-        const isStem = task.type.startsWith("stem");
+        const isStem = task.type && task.type.startsWith("stem");
 
         const btn = document.createElement("button");
         btn.onclick = () => {
@@ -565,9 +572,13 @@
 
     function toggleLeaderboardModal() {
       const modal = document.getElementById("leaderboardModal");
-      modal.classList.toggle("hidden");
-      if (!modal.classList.contains("hidden")) {
+      if (modal.classList.contains("hidden")) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
         renderLeaderboard();
+      } else {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
       }
     }
 
@@ -610,12 +621,16 @@
     }
 
     function openSummaryModal() {
-      document.getElementById("summaryModal").classList.remove("hidden");
+      const modal = document.getElementById("summaryModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
       generateAIPedagogicalReport();
     }
 
     function closeSummaryModal() {
-      document.getElementById("summaryModal").classList.add("hidden");
+      const modal = document.getElementById("summaryModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
     }
 
     function generateAIPedagogicalReport() {
@@ -654,7 +669,7 @@
           </div>
         `;
         lucide.createIcons();
-      }, 500);
+      }, 300);
     }
 
     function exportToExcelCSV() {
@@ -701,14 +716,19 @@
       document.body.removeChild(link);
     }
 
-    // MODAL GIAO BÀI TẬP: TÍCH HỢP LISTBOX STEM + CHECKBOX GỢI Ý CODE MẪU
+    // MODAL GIAO BÀI TẬP: MỞ / ĐÓNG CHUẨN XÁC
     function openAssignModal() {
       renderAssignModalList();
-      document.getElementById("assignModal").classList.remove("hidden");
+      const modal = document.getElementById("assignModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      lucide.createIcons();
     }
 
     function closeAssignModal() {
-      document.getElementById("assignModal").classList.add("hidden");
+      const modal = document.getElementById("assignModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
     }
 
     function renderAssignModalList() {
@@ -716,14 +736,13 @@
       container.innerHTML = "";
 
       currentAssignments.forEach((t, i) => {
-        const isStem = t.type.startsWith("stem");
+        const isStem = t.type && t.type.startsWith("stem");
         const hasTemplate = t.hasTemplate !== undefined ? t.hasTemplate : true;
 
         const box = document.createElement("div");
         box.className = `p-3.5 bg-slate-950 border rounded-xl space-y-2.5 text-xs ${isStem ? 'border-amber-500/50 bg-amber-950/15' : 'border-slate-800'}`;
         box.innerHTML = `
           <div class="flex justify-between items-center flex-wrap gap-2">
-            <!-- 1. Listbox chọn loại bài tập -->
             <div class="flex items-center space-x-2">
               <span class="font-bold ${isStem ? 'text-amber-400' : 'text-indigo-400'}">Nhiệm vụ #${i + 1} (${t.id})</span>
               <select onchange="changeTaskType(${i}, this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1 text-white font-semibold">
@@ -733,7 +752,6 @@
               </select>
             </div>
 
-            <!-- 2. Checkbox Gợi ý Code Mẫu (Scaffolding) -->
             <div class="flex items-center space-x-3">
               <label class="flex items-center space-x-1.5 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-md border border-slate-700/80 hover:border-slate-600">
                 <input type="checkbox" onchange="toggleTaskTemplate(${i}, this.checked)" ${hasTemplate ? 'checked' : ''} class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer" />
@@ -746,29 +764,25 @@
             </div>
           </div>
 
-          <input type="text" value="${t.title}" oninput="currentAssignments[${i}].title = this.value" placeholder="Tên bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-white font-semibold" />
-          <textarea oninput="currentAssignments[${i}].desc = this.value" placeholder="Mô tả yêu cầu bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-300 text-xs h-14">${t.desc}</textarea>
+          <input type="text" value="${t.title || ''}" oninput="currentAssignments[${i}].title = this.value" placeholder="Tên bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-white font-semibold" />
+          <textarea oninput="currentAssignments[${i}].desc = this.value" placeholder="Mô tả yêu cầu bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-300 text-xs h-14">${t.desc || ''}</textarea>
           
           <div class="flex space-x-2">
-            <input type="text" value="${t.sample}" oninput="currentAssignments[${i}].sample = this.value" placeholder="Quy cách / Minh họa" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-white" />
-            <input type="text" value="${t.expectedOutput}" oninput="currentAssignments[${i}].expectedOutput = this.value" placeholder="Output cần so khớp" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-emerald-400 font-mono font-bold" />
+            <input type="text" value="${t.sample || ''}" oninput="currentAssignments[${i}].sample = this.value" placeholder="Quy cách / Minh họa" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-white" />
+            <input type="text" value="${t.expectedOutput || ''}" oninput="currentAssignments[${i}].expectedOutput = this.value" placeholder="Output cần so khớp" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-emerald-400 font-mono font-bold" />
           </div>
 
-          <!-- Hiển thị trước đoạn code học sinh sẽ nhận được -->
           <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800/80">
             <span class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Mã nguồn học sinh sẽ nhận trong Editor:</span>
-            <pre class="font-mono text-[11px] text-slate-400 overflow-x-auto max-h-20">${t.template}</pre>
+            <pre class="font-mono text-[11px] text-slate-400 overflow-x-auto max-h-20">${t.template || ''}</pre>
           </div>
         `;
         container.appendChild(box);
       });
     }
 
-    // Khi giáo viên đổi loại bài từ Listbox
     function changeTaskType(index, newType) {
-      const preset = PRESETS[newType];
-      if (!preset) return;
-
+      const preset = PRESETS[newType] || PRESETS.algorithm;
       currentAssignments[index].type = newType;
       currentAssignments[index].title = `Bài ${index + 1}: ${preset.title}`;
       currentAssignments[index].desc = preset.desc;
@@ -781,7 +795,6 @@
       renderAssignModalList();
     }
 
-    // Khi giáo viên bật/tắt checkbox code mẫu
     function toggleTaskTemplate(index, isChecked) {
       currentAssignments[index].hasTemplate = isChecked;
       const type = currentAssignments[index].type;
@@ -831,6 +844,8 @@
       assignmentsRef.set(currentAssignments).then(() => {
         alert(`Đã lưu và cập nhật thành công ${currentAssignments.length} nhiệm vụ tới tất cả học sinh!`);
         closeAssignModal();
+      }).catch(err => {
+        alert("Lỗi khi lưu lên Firebase: " + err.message);
       });
     }
 
