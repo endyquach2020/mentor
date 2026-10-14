@@ -29,7 +29,7 @@
         <div>
           <div class="flex items-center space-x-2">
             <h1 class="text-base font-bold text-white tracking-wide">CodeMentor-AI | Cockpit Sư Phạm Số (Python & STEM)</h1>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">STEM INTEGRATED</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">STEM & SCAFFOLDING</span>
           </div>
           <p class="text-xs text-slate-400">Giám sát lập trình giải thuật & mô hình thực hành STEM thời gian thực</p>
         </div>
@@ -235,35 +235,39 @@
     </div>
   </div>
 
-  <!-- MODAL 3: GIAO BÀI TẬP (CÓ CHỨC NĂNG CHỌN STEM VÀ THÊM BÀI STEM MẪU) -->
+  <!-- MODAL 3: GIAO BÀI TẬP (CÓ LISTBOX STEM + CHECKBOX GỢI Ý CODE MẪU) -->
   <div id="assignModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center space-x-2">
           <i data-lucide="book-plus" class="w-5 h-5 text-indigo-400"></i>
           <div>
             <h3 class="text-sm font-bold text-white">Quản lý & Giao bài tập cho tiết học</h3>
-            <p class="text-[11px] text-slate-400">Hỗ trợ giao cả bài giải thuật Python và Dự án thực hành STEM</p>
+            <p class="text-[11px] text-slate-400">Tùy biến bài tập giải thuật hoặc các mô hình STEM kèm phân hóa gợi ý code mẫu</p>
           </div>
         </div>
         <button onclick="closeAssignModal()" class="text-slate-400 hover:text-white text-lg leading-none">&times;</button>
       </div>
 
-      <div class="space-y-3 max-h-96 overflow-y-auto pr-1" id="assignModalTaskList"></div>
+      <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1" id="assignModalTaskList"></div>
 
       <div class="flex items-center justify-between pt-3 border-t border-slate-800 flex-wrap gap-2">
         <div class="flex items-center space-x-2">
           <button onclick="addNewAlgorithmTask()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-            <span>Thêm bài Thuật toán</span>
+            <span>+ Bài Thuật toán mới</span>
           </button>
-          <button onclick="addDefaultStemTrafficTask()" class="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-semibold flex items-center space-x-1">
+          <button onclick="addNewStemTaskFromPreset('stem_traffic')" class="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded-lg text-xs font-semibold flex items-center space-x-1">
             <i data-lucide="cpu" class="w-3.5 h-3.5 text-amber-400"></i>
-            <span>+ Thêm Dự án STEM (Đèn giao thông)</span>
+            <span>+ Thêm STEM Đèn Giao Thông</span>
+          </button>
+          <button onclick="addNewStemTaskFromPreset('stem_morse')" class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/40 rounded-lg text-xs font-semibold flex items-center space-x-1">
+            <i data-lucide="radio" class="w-3.5 h-3.5 text-red-400"></i>
+            <span>+ Thêm STEM Morse SOS</span>
           </button>
         </div>
         
-        <button onclick="saveAssignmentsToFirebase()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow-md shadow-indigo-600/30">
+        <button onclick="saveAssignmentsToFirebase()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow-md shadow-indigo-600/30">
           Lưu & Phát tới tất cả học sinh
         </button>
       </div>
@@ -286,6 +290,36 @@
     const pcsRef = firebase.database().ref("pcs");
     const assignmentsRef = firebase.database().ref("assignments");
 
+    // KHO BÀI TẬP MẪU CHUẨN CÓ SẴN (PRESETS)
+    const PRESETS = {
+      algorithm: {
+        title: "Bài tập Thuật toán Python",
+        desc: "Viết chương trình xử lý thuật toán theo yêu cầu...",
+        sample: "Input ➔ Output",
+        expectedOutput: "0",
+        templateStarter: "# Viết code giải bài toán tại đây:\n\n",
+        templateBlank: "# Viết toàn bộ mã nguồn từ đầu:\n"
+      },
+      stem_traffic: {
+        title: "[STEM] Điều khiển Trạm Đèn Giao Thông",
+        desc: "Dự án STEM: Vận dụng logic tuần tự và trễ thời gian để mô phỏng chu kỳ đèn giao thông ngã tư: Bật ĐỎ (3s) ➔ VÀNG (1s) ➔ XANH (3s).",
+        sample: "Đèn Đỏ ➔ Vàng ➔ Xanh",
+        expectedOutput: "STEM_PASSED",
+        // Code gợi ý khung sườn (scaffolding)
+        templateStarter: "# DỰ ÁN STEM: ĐIỀU KHIỂN ĐÈN GIAO THÔNG\n# Các hàm có sẵn: led_red.on(), led_yellow.on(), led_green.on()\n# led_all_off(), sleep(giây)\n\nled_all_off()\n\n# 1. Bật đèn Đỏ sáng 3 giây\nled_red.on()\nsleep(3)\n\n# 2. Chuyển sang đèn Vàng 1 giây (Học sinh viết tiếp tại đây):\n\n\n# 3. Chuyển sang đèn Xanh 3 giây (Học sinh viết tiếp tại đây):\n\n\nprint('STEM_PASSED')",
+        // Code trống (không gợi ý)
+        templateBlank: "# DỰ ÁN STEM: ĐIỀU KHIỂN ĐÈN GIAO THÔNG\n# Học sinh tự lập trình toàn bộ chu kỳ Đỏ ➔ Vàng ➔ Xanh:\n\nprint('STEM_PASSED')"
+      },
+      stem_morse: {
+        title: "[STEM] Trạm Phát Tín Hiệu Morse SOS",
+        desc: "Dự án STEM: Quy chuẩn hàng hải quốc tế quy định tín hiệu cầu cứu SOS gồm: 3 nháy ngắn (S: · · ·) ➔ 3 nháy dài (O: — — —) ➔ 3 nháy ngắn (S: · · ·). Hãy dùng vòng lặp for lập trình phát chuỗi tín hiệu SOS.",
+        sample: "· · ·   — — —   · · ·",
+        expectedOutput: "SOS_TRANSMITTED",
+        templateStarter: "# DỰ ÁN STEM: TRẠM PHÁT MÃ MORSE SOS\n# Các hàm có sẵn: morse_dot(), morse_dash()\n\n# 1. Phát chữ S (3 nháy ngắn)\nfor i in range(3):\n    morse_dot()\n\n# 2. Phát chữ O (3 nháy dài) - Học sinh viết tiếp tại đây:\n\n\n# 3. Phát chữ S (3 nháy ngắn) - Học sinh viết tiếp tại đây:\n\n\nprint('SOS_TRANSMITTED')",
+        templateBlank: "# DỰ ÁN STEM: TRẠM PHÁT MÃ MORSE SOS\n# Tự viết vòng lặp phát đủ 3 chữ S - O - S:\n\nprint('SOS_TRANSMITTED')"
+      }
+    };
+
     let currentAssignments = [];
     let onlinePCs = [];
     let selectedPcId = null;
@@ -299,9 +333,9 @@
           currentAssignments = data;
         } else {
           currentAssignments = [
-            { id: "task_1", type: "algorithm", title: "Bài 1: Tính tổng số chẵn từ 1 đến N", desc: "Tính tổng chẵn từ 1 đến 10", sample: "10 ➔ 30", expectedOutput: "30", template: "# Bài 1\nn = 10\ntong = 0\nfor i in range(1, n + 1):\n    if i % 2 == 0:\n        tong += i\nprint(tong)" },
-            { id: "task_2", type: "algorithm", title: "Bài 2: Đếm số lượng ước của N", desc: "Đếm số ước nguyên dương của 12", sample: "12 ➔ 6", expectedOutput: "6", template: "# Bài 2\nn = 12\ndem = 0\nprint(dem)" },
-            { id: "task_3", type: "algorithm", title: "Bài 3: Tìm số lớn nhất trong mảng", desc: "Tìm max mảng [5, 18, 3, 42, 9, 21]", sample: "Max ➔ 42", expectedOutput: "42", template: "# Bài 3\nA = [5, 18, 3, 42, 9, 21]\n" }
+            { id: "task_1", type: "algorithm", hasTemplate: true, title: "Bài 1: Tính tổng số chẵn từ 1 đến N", desc: "Tính tổng chẵn từ 1 đến 10", sample: "10 ➔ 30", expectedOutput: "30", template: "# Bài 1\nn = 10\ntong = 0\nfor i in range(1, n + 1):\n    if i % 2 == 0:\n        tong += i\nprint(tong)" },
+            { id: "task_2", type: "algorithm", hasTemplate: false, title: "Bài 2: Đếm số lượng ước của N", desc: "Đếm số ước nguyên dương của 12", sample: "12 ➔ 6", expectedOutput: "6", template: "# Bài 2: Tự viết thuật toán\n" },
+            { id: "task_3", type: "stem_traffic", hasTemplate: true, title: "Bài 3: [STEM] Điều khiển Trạm Đèn Giao Thông", desc: PRESETS.stem_traffic.desc, sample: PRESETS.stem_traffic.sample, expectedOutput: "STEM_PASSED", template: PRESETS.stem_traffic.templateStarter }
           ];
           assignmentsRef.set(currentAssignments);
         }
@@ -447,7 +481,7 @@
       currentAssignments.forEach((task, idx) => {
         const isPassed = studentTasks[task.id]?.passed;
         const isSelected = task.id === selectedTaskKeyToView;
-        const isStem = task.type === "stem";
+        const isStem = task.type.startsWith("stem");
 
         const btn = document.createElement("button");
         btn.onclick = () => {
@@ -600,21 +634,21 @@
               </h4>
               <p class="text-[11px] leading-relaxed text-slate-300">
                 Có <b>${totalStudents}</b> học sinh tham gia. 
-                Trong đó <b>${passedAll}/${totalStudents}</b> em hoàn thành toàn bộ ${currentAssignments.length} nhiệm vụ (gồm các bài giải thuật và dự án STEM mô phỏng điều khiển).
+                Trong đó <b>${passedAll}/${totalStudents}</b> em hoàn thành toàn bộ ${currentAssignments.length} nhiệm vụ (gồm cả bài giải thuật và dự án STEM mô phỏng).
               </p>
             </div>
 
             <div>
               <h4 class="font-bold text-slate-200 text-xs mb-1">🔍 Đánh giá năng lực thực hành STEM:</h4>
               <p class="text-[11px] leading-relaxed text-slate-400">
-                Học sinh nắm vững cách ánh xạ các cấu trúc điều khiển trong code vào thiết bị vật lý. Việc tích hợp mô hình đèn giao thông ảo giúp các em hiểu rõ chu kỳ trễ (delay) và thứ tự tuần tự trong thực tế.
+                Học sinh nắm vững cách ánh xạ các cấu trúc điều khiển trong code vào thiết bị vật lý. Việc kết hợp khung sườn code mẫu (scaffolding) giúp học sinh trung bình tự tin hoàn thiện bài mà không bị chán nản.
               </p>
             </div>
 
             <div class="p-2.5 bg-blue-950/20 border border-blue-900/30 rounded-lg">
               <h4 class="font-bold text-blue-300 text-xs mb-1">💡 Đề xuất sư phạm tiết tiếp theo:</h4>
               <p class="text-[11px] leading-relaxed text-slate-300">
-                Có thể mở rộng bài tập STEM sang mô hình cảm biến nhiệt độ cảnh báo cháy hoặc hệ thống chiếu sáng tự động theo thời gian.
+                Khuyến khích học sinh tắt checkbox gợi ý code mẫu để nâng cao khả năng tự thiết kế thuật toán từ đầu.
               </p>
             </div>
           </div>
@@ -667,7 +701,7 @@
       document.body.removeChild(link);
     }
 
-    // MODAL GIAO BÀI TẬP (HỖ TRỢ THÊM BÀI STEM DỄ DÀNG)
+    // MODAL GIAO BÀI TẬP: TÍCH HỢP LISTBOX STEM + CHECKBOX GỢI Ý CODE MẪU
     function openAssignModal() {
       renderAssignModalList();
       document.getElementById("assignModal").classList.remove("hidden");
@@ -682,39 +716,78 @@
       container.innerHTML = "";
 
       currentAssignments.forEach((t, i) => {
+        const isStem = t.type.startsWith("stem");
+        const hasTemplate = t.hasTemplate !== undefined ? t.hasTemplate : true;
+
         const box = document.createElement("div");
-        box.className = `p-3 bg-slate-950 border rounded-xl space-y-2 text-xs ${t.type === 'stem' ? 'border-amber-500/50 bg-amber-950/10' : 'border-slate-800'}`;
+        box.className = `p-3.5 bg-slate-950 border rounded-xl space-y-2.5 text-xs ${isStem ? 'border-amber-500/50 bg-amber-950/15' : 'border-slate-800'}`;
         box.innerHTML = `
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-center flex-wrap gap-2">
+            <!-- 1. Listbox chọn loại bài tập -->
             <div class="flex items-center space-x-2">
-              <span class="font-bold ${t.type === 'stem' ? 'text-amber-400' : 'text-indigo-400'}">Nhiệm vụ #${i + 1} (${t.id})</span>
-              <select onchange="updateTaskType(${i}, this.value)" class="bg-slate-900 border border-slate-700 text-[10px] rounded px-2 py-0.5 text-white">
-                <option value="algorithm" ${t.type !== 'stem' ? 'selected' : ''}>💻 Thuật toán Python</option>
-                <option value="stem" ${t.type === 'stem' ? 'selected' : ''}>🚦 Dự án STEM Mô phỏng</option>
+              <span class="font-bold ${isStem ? 'text-amber-400' : 'text-indigo-400'}">Nhiệm vụ #${i + 1} (${t.id})</span>
+              <select onchange="changeTaskType(${i}, this.value)" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1 text-white font-semibold">
+                <option value="algorithm" ${t.type === 'algorithm' ? 'selected' : ''}>💻 Thuật toán Python</option>
+                <option value="stem_traffic" ${t.type === 'stem_traffic' || t.type === 'stem' ? 'selected' : ''}>🚦 STEM 1: Đèn Giao Thông</option>
+                <option value="stem_morse" ${t.type === 'stem_morse' ? 'selected' : ''}>🆘 STEM 2: Tín hiệu Morse SOS</option>
               </select>
             </div>
-            <button onclick="deleteTask(${i})" class="text-red-400 hover:text-red-300 font-semibold">Xóa bài này</button>
+
+            <!-- 2. Checkbox Gợi ý Code Mẫu (Scaffolding) -->
+            <div class="flex items-center space-x-3">
+              <label class="flex items-center space-x-1.5 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-md border border-slate-700/80 hover:border-slate-600">
+                <input type="checkbox" onchange="toggleTaskTemplate(${i}, this.checked)" ${hasTemplate ? 'checked' : ''} class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer" />
+                <span class="text-[11px] font-semibold ${hasTemplate ? 'text-emerald-400' : 'text-slate-400'}">
+                  ${hasTemplate ? '✓ Có gợi ý code sườn' : '✕ Tắt code mẫu (Tự viết)'}
+                </span>
+              </label>
+
+              <button onclick="deleteTask(${i})" class="text-red-400 hover:text-red-300 font-semibold text-[11px] px-1.5 py-0.5 rounded hover:bg-red-950/40">Xóa</button>
+            </div>
           </div>
+
           <input type="text" value="${t.title}" oninput="currentAssignments[${i}].title = this.value" placeholder="Tên bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-white font-semibold" />
-          <textarea oninput="currentAssignments[${i}].desc = this.value" placeholder="Mô tả yêu cầu bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-300 text-xs">${t.desc}</textarea>
+          <textarea oninput="currentAssignments[${i}].desc = this.value" placeholder="Mô tả yêu cầu bài tập" class="w-full bg-slate-900 border border-slate-800 rounded p-1.5 text-slate-300 text-xs h-14">${t.desc}</textarea>
+          
           <div class="flex space-x-2">
-            <input type="text" value="${t.sample}" oninput="currentAssignments[${i}].sample = this.value" placeholder="Quy cách / Ví dụ" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-white" />
+            <input type="text" value="${t.sample}" oninput="currentAssignments[${i}].sample = this.value" placeholder="Quy cách / Minh họa" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-white" />
             <input type="text" value="${t.expectedOutput}" oninput="currentAssignments[${i}].expectedOutput = this.value" placeholder="Output cần so khớp" class="flex-1 bg-slate-900 border border-slate-800 rounded p-1.5 text-emerald-400 font-mono font-bold" />
+          </div>
+
+          <!-- Hiển thị trước đoạn code học sinh sẽ nhận được -->
+          <div class="bg-slate-900/90 p-2 rounded-lg border border-slate-800/80">
+            <span class="text-[10px] uppercase font-bold text-slate-500 block mb-1">Mã nguồn học sinh sẽ nhận trong Editor:</span>
+            <pre class="font-mono text-[11px] text-slate-400 overflow-x-auto max-h-20">${t.template}</pre>
           </div>
         `;
         container.appendChild(box);
       });
     }
 
-    function updateTaskType(index, type) {
-      currentAssignments[index].type = type;
-      if (type === 'stem') {
-        currentAssignments[index].title = `Bài ${index + 1}: [STEM] Điều khiển Trạm Đèn Giao Thông`;
-        currentAssignments[index].desc = "Dự án STEM: Vận dụng logic tuần tự và trễ thời gian để mô phỏng chu kỳ đèn giao thông: Bật ĐỎ (3s) ➔ VÀNG (1s) ➔ XANH (3s).";
-        currentAssignments[index].sample = "Đèn Đỏ ➔ Vàng ➔ Xanh";
-        currentAssignments[index].expectedOutput = "STEM_PASSED";
-        currentAssignments[index].template = "led_all_off()\nled_red.on()\nsleep(3)\nled_yellow.on()\nsleep(1)\nled_green.on()\nsleep(3)\nprint('STEM_PASSED')";
-      }
+    // Khi giáo viên đổi loại bài từ Listbox
+    function changeTaskType(index, newType) {
+      const preset = PRESETS[newType];
+      if (!preset) return;
+
+      currentAssignments[index].type = newType;
+      currentAssignments[index].title = `Bài ${index + 1}: ${preset.title}`;
+      currentAssignments[index].desc = preset.desc;
+      currentAssignments[index].sample = preset.sample;
+      currentAssignments[index].expectedOutput = preset.expectedOutput;
+
+      const hasTemplate = currentAssignments[index].hasTemplate !== false;
+      currentAssignments[index].template = hasTemplate ? preset.templateStarter : preset.templateBlank;
+
+      renderAssignModalList();
+    }
+
+    // Khi giáo viên bật/tắt checkbox code mẫu
+    function toggleTaskTemplate(index, isChecked) {
+      currentAssignments[index].hasTemplate = isChecked;
+      const type = currentAssignments[index].type;
+      const preset = PRESETS[type] || PRESETS.algorithm;
+
+      currentAssignments[index].template = isChecked ? preset.templateStarter : preset.templateBlank;
       renderAssignModalList();
     }
 
@@ -723,26 +796,28 @@
       currentAssignments.push({
         id: newId,
         type: "algorithm",
+        hasTemplate: true,
         title: `Bài ${currentAssignments.length + 1}: Bài tập mới`,
-        desc: "Mô tả đề bài...",
+        desc: "Mô tả đề bài thuật toán...",
         sample: "Ví dụ: 1 ➔ 1",
         expectedOutput: "1",
-        template: "# Viết code tại đây\n"
+        template: "# Viết code tại đây:\n"
       });
       renderAssignModalList();
     }
 
-    // Nút 1-chạm thêm ngay bài STEM đèn giao thông
-    function addDefaultStemTrafficTask() {
+    function addNewStemTaskFromPreset(presetKey) {
+      const preset = PRESETS[presetKey];
       const newId = `task_${currentAssignments.length + 1}`;
       currentAssignments.push({
         id: newId,
-        type: "stem",
-        title: `Bài ${currentAssignments.length + 1}: [STEM] Điều khiển Trạm Đèn Giao Thông`,
-        desc: "Dự án STEM: Vận dụng logic tuần tự và trễ thời gian để mô phỏng chu kỳ đèn giao thông ngã tư: Bật ĐỎ (3s) ➔ VÀNG (1s) ➔ XANH (3s).",
-        sample: "Đèn Đỏ ➔ Vàng ➔ Xanh",
-        expectedOutput: "STEM_PASSED",
-        template: "led_all_off()\nled_red.on()\nsleep(3)\nled_yellow.on()\nsleep(1)\nled_green.on()\nsleep(3)\nprint('STEM_PASSED')"
+        type: presetKey,
+        hasTemplate: true,
+        title: `Bài ${currentAssignments.length + 1}: ${preset.title}`,
+        desc: preset.desc,
+        sample: preset.sample,
+        expectedOutput: preset.expectedOutput,
+        template: preset.templateStarter
       });
       renderAssignModalList();
     }
